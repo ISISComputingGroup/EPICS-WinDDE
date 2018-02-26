@@ -20,7 +20,8 @@ So you would use:
     field(OUT, "@asyn($(PORT),1,0)double1") 
 ```
 within e.g. an EPICS ao record to tie it to the "double1" DDE item, note the "1" passed as the asyn address
-in this case is to indicate a double data type. See *WinDDETest.db* for more explanation and an example.
+in this case is to indicate a double data type. See *WinDDETest.db* for more explanation and an example. To see changes 
+pushed via DDE from elsewhere you could also either create an ai record mapped to the double1 parameter scanning at "I/O Inst", or you could use asyn:READBACK info record on the original ao record.  
 
 When using the driver either standalone or incorporated into another driver, you would create additional 
 PVs that mapped to the DDE item names and then push updates to (or monitor) these PV to form the DDE link.   
