@@ -29,12 +29,16 @@ as done in   WinDDETestMain.cpp   to add a message loop to pump DDE messages.
 
 ### Tested with Microsoft Excel
 
-Create a cell with the formula      =IOC|getPV!long1      you should then see changes written to the 
-process variable $(P)$(R)LONGTEST:SP defined in WinDDETest.db  when running the WinDDETest IOC
+Create a cell with the formula
+```
+=IOC|getPV!long1
+```
+you should then see changes written to the 
+process variable *$(P)$(R)LONGTEST:SP* defined in *WinDDETest.db*  when running the WinDDETest IOC
 
 ### Tested with National Instruments LabVIEW
 
-You need to load  dde.llb  from the  vi.lib/Platform  folder in the LabVIEW distribution
-Setting a value from here was reflected in the $(P)$(R)LONGTEST PV as well as in Excel
+You need to load  *dde.llb*  from the  *vi.lib/Platform*  folder in the LabVIEW distribution
+Setting a value from here was reflected in the *$(P)$(R)LONGTEST* PV as well as in Excel
 
 Any comments/problems, contact: freddie.akeroyd@stfc.ac.uk
