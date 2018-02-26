@@ -38,6 +38,7 @@ public:
 	static HSZ m_serviceName;
 	static DWORD m_ddeThreadId; ///< id of thread used to initialise DDEML and which must be used for all DDEML functions
 	static std::map<int, HSZ> m_ddeItemHandles;
+	static std::string m_ddeItemList; ///< tab separated list of all asyn parameter items we support
 	static HSZ m_pvTopic;  ///< our getPV topic name
 	static WinDDEDriver* m_driver;
 private:

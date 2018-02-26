@@ -154,7 +154,8 @@ HDDEDATA CALLBACK WinDDEDriver::DdeCallback(
 			//			  printf("request: %s\n", itemName.c_str());
 			if (hsz2 == topicItemList)
 			{
-				itemValue = SZDDE_ITEM_ITEMLIST; ///< @todo need to add other items
+				itemValue = SZDDE_ITEM_ITEMLIST "\t" SZDDESYS_ITEM_FORMATS ; 
+				itemValue += m_ddeItemList;
 			}
 			else if (hsz2 == topicFormats)
 			{
@@ -397,6 +398,8 @@ asynStatus WinDDEDriver::drvUserCreate(asynUser *pasynUser, const char *drvInfo,
 			return(asynError);
 			break;
 		}
+		m_ddeItemList += "\t";
+		m_ddeItemList += drvInfo;
 		m_ddeItemHandles[index] = DdeCreateStringHandle(m_idInst, drvInfo, CP_WINANSI);
 	}
 	pasynUser->reason = index;
@@ -517,3 +520,4 @@ DWORD WinDDEDriver::m_ddeThreadId; ///< id of thread used to access ddeml
 std::map<int, HSZ> WinDDEDriver::m_ddeItemHandles;
 HSZ WinDDEDriver::m_pvTopic = NULL;
 WinDDEDriver* WinDDEDriver::m_driver = NULL;
+std::string WinDDEDriver::m_ddeItemList;
