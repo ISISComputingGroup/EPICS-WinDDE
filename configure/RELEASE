@@ -1,0 +1,13 @@
+
+EPICS_BASE=c:/Instrument/Apps/EPICS/base/master
+ASYN=$(SUPPORT)/asyn/master
+
+# only needed at STFC ISIS
+ONCRPC=$(SUPPORT)/oncrpc/master
+
+# optional extra local definitions here
+-include $(TOP)/configure/RELEASE.private
+
+# isis standard includes
+-include $(TOP)/../../../ISIS_CONFIG
+

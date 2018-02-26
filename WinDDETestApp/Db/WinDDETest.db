@@ -1,0 +1,43 @@
+## we use the asyn addr parameter to indicate data type so we can create parameters on the fly
+## The mapping is as per DDEDataType in WinDDEDriver.h i.e. 0 for integer, 1 for double, 2 for string
+
+record(longout, "$(P)$(R)LONGTEST:SP")
+{
+    field(DTYP, "asynInt32")
+	field(OUT, "@asyn($(PORT),0,0)long1")
+}
+
+record(longin, "$(P)$(R)LONGTEST")
+{
+    field(DTYP, "asynInt32")
+	field(INP, "@asyn($(PORT),0,0)long1")
+	field(SCAN, "I/O Intr")
+}
+
+record(ao, "$(P)$(R)DOUBLETEST:SP")
+{
+    field(DTYP, "asynFloat64")
+	field(PREC, 3)
+	field(OUT, "@asyn($(PORT),1,0)double1")
+}
+
+record(ai, "$(P)$(R)DOUBLETEST")
+{
+    field(DTYP, "asynFloat64")
+	field(INP, "@asyn($(PORT),1,0)double1")
+	field(PREC, 3)
+	field(SCAN, "I/O Intr")
+}
+
+record(stringout, "$(P)$(R)STRINGTEST:SP")
+{
+    field(DTYP, "asynOctetWrite")
+	field(OUT, "@asyn($(PORT),2,0)string1")
+}
+
+record(stringin, "$(P)$(R)STRINGTEST")
+{
+    field(DTYP, "asynOctetRead")
+	field(INP, "@asyn($(PORT),2,0)string1")
+	field(SCAN, "I/O Intr")
+}

@@ -1,0 +1,5 @@
+Copyright (c) 2018 Science and Technology Facilities Council (STFC), GB. 
+All rights reverved. 
+
+This software is distributed under the terms of the 
+EPICS Open License https://epics.anl.gov/license/open.php
