@@ -29,8 +29,9 @@
 
 static void iocMain(void* arg)
 {
-	iocsh((const char*)arg);
-	epicsExit(0);
+	DWORD mainThreadId = (DWORD)arg;
+	iocsh(NULL);
+	PostThreadMessage(mainThreadId, WM_QUIT, 0, 0); // so message loop terminates and exit called from main thread
 }
 
 int main(int argc, char *argv[])
@@ -40,7 +41,7 @@ int main(int argc, char *argv[])
 		epicsThreadSleep(.2);
 	}
 	// start interactive ioc shell in separate thread to keep main thread for use as message pump
-	_beginthread(iocMain, 0, NULL);
+	_beginthread(iocMain, 0, (void*)GetCurrentThreadId());
 
 	// standard windows message pump to process DDE messages
 	MSG msg;

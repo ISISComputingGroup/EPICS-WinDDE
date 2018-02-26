@@ -412,6 +412,9 @@ asynStatus WinDDEDriver::drvUserCreate(asynUser *pasynUser, const char *drvInfo,
 void WinDDEDriver::epicsExitFunc(void* arg)
 {
 	WinDDEDriver* driver = (WinDDEDriver*)arg;
+	DdeNameService(m_idInst, 0, 0, DNS_UNREGISTER);
+	DdeUninitialize(m_idInst);
+	m_idInst = 0;
 }
 
 void WinDDEDriver::WinDDETaskC(void* arg)
