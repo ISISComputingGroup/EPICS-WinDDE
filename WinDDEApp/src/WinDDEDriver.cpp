@@ -179,6 +179,7 @@ HDDEDATA CALLBACK WinDDEDriver::DdeCallback(
 			printf("unknown request callback %d\n", uType);
 		}
 		return (HDDEDATA)NULL;
+		break;
 
 	case XTYP_POKE:
 		if (hsz1 == m_pvTopic && uFmt == CF_TEXT)
@@ -202,6 +203,7 @@ HDDEDATA CALLBACK WinDDEDriver::DdeCallback(
 		}
 		//	      printf("unknown poke callback %d\n", uType);
 		return (HDDEDATA)DDE_FNOTPROCESSED;
+		break;
 
 	case XTYP_ADVSTART:
 		if (hsz1 == m_pvTopic && uFmt == CF_TEXT)
@@ -217,9 +219,11 @@ HDDEDATA CALLBACK WinDDEDriver::DdeCallback(
 			//	          printf("advstart callback %s %s %d\n", topicName.c_str(), itemName.c_str(), uFmt);
 			return (HDDEDATA)FALSE;
 		}
+		break;
 
 	case XTYP_ADVSTOP:
 		return (HDDEDATA)TRUE;
+		break;
 
 	default:
 		printf("unknown callback %d\n", uType);
@@ -231,7 +235,7 @@ HDDEDATA CALLBACK WinDDEDriver::DdeCallback(
 
 void WinDDEDriver::setParamValueAsString(const std::string& itemName, const char* itemValue)
 {
-	int index;
+	int index = -1;
 	asynParamType paramType;
 	lock();
 	if (findParam(itemName.c_str(), &index) == asynSuccess)
@@ -259,16 +263,20 @@ void WinDDEDriver::setParamValueAsString(const std::string& itemName, const char
 	else
 	{
 		printf("unknown item %s\n", itemName.c_str());
+		index = -1;
 	}
 	callParamCallbacks();
 	unlock();
 	// post an update so all DDE clients see change
-	PostThreadMessage(m_ddeThreadId, WM_EPICSDDE, (WPARAM)(dde_cb_func_t)&WinDDEDriver::postAdvise, index);
+	if (index >= 0)
+	{
+		PostThreadMessage(m_ddeThreadId, WM_EPICSDDE, (WPARAM)(dde_cb_func_t)&WinDDEDriver::postAdvise, index);
+	}
 }
 
 void WinDDEDriver::getParamValueAsString(const std::string& itemName, std::string& itemValue)
 {
-	int index;
+	int index = -1;
 	asynParamType paramType;
 	char buffer[32];
 	lock();
@@ -314,7 +322,7 @@ void WinDDEDriver::getParamValueAsString(const std::string& itemName, std::strin
 
 void WinDDEDriver::postAdvise(LPARAM param_id)
 {
-	if (DdePostAdvise(m_idInst, m_pvTopic, m_ddeItemHandles[param_id]) == 0)
+	if ( (param_id >= 0) && (DdePostAdvise(m_idInst, m_pvTopic, m_ddeItemHandles[param_id]) == 0) )
 	{
 		int ret = DdeGetLastError(m_idInst);
 		printf("DdePostAdvise error %d\n", ret);
