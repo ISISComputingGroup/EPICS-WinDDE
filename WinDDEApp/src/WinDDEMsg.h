@@ -8,10 +8,6 @@
 #ifndef WINDDEMSG_H
 #define WINDDEMSG_H
 
-/// private windows message for notifying DDE of epics value change
-#define WM_EPICSDDE WM_USER
-
-/// callback function type passed in wParam to message pump via WM_EPICSDDE
-typedef void (*dde_cb_func_t)(LPARAM);
+epicsShareExtern void WinDDEIOCMain();
 
 #endif /* WINDDEMSG_H */
