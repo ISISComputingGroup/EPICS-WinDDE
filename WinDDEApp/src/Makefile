@@ -23,6 +23,12 @@ WinDDE_LIBS += asyn
 WinDDE_LIBS += $(EPICS_BASE_IOC_LIBS)
 WinDDE_SYS_LIBS_WIN32 += user32
 
+PROD_IOC += WinDDEClient
+WinDDEClient_SRCS += WinDDEDriverClient.cxx
+WinDDEClient_LIBS += asyn
+WinDDEClient_LIBS += $(EPICS_BASE_IOC_LIBS)
+WinDDEClient_SYS_LIBS_WIN32 += user32
+
 #===========================
 
 include $(TOP)/configure/RULES
