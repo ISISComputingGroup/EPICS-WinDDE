@@ -58,7 +58,8 @@ static void DDERequest(DWORD idInst, HCONV hConv, const char* szItem, char* resu
     else
     {
 		DWORD len = DdeGetData(hData, (unsigned char *)result, len_result-1, 0);
-		result[len] = '\0';		
+		result[len] = '\0';
+		result[len_result-1] = '\0';
 	    DdeFreeDataHandle(hData);
     }
 }
@@ -105,7 +106,13 @@ int main(int argc, char* argv[])
     }
 
 //    DDEExecute(idInst, hConv, "Source:Instruments.Count");
-    DDEExecute(idInst, hConv, "Source:Instruments(\"Humidity Controller\").Devices(\"Humidity Programmer\").Object.Temperature");
+    const char* source = "Source:Instruments(\"Humidity Controller\").Devices(\"Humidity Programmer\").Object.Temperature";
+    if (argv[1]!= NULL)
+	{
+	    source = argv[1];
+	}
+	printf("Using source %s\n", source);
+    DDEExecute(idInst, hConv, source);
 		
 	char result[256], command[256];
 
@@ -127,8 +134,11 @@ int main(int argc, char* argv[])
 			{
                 DDEExecute(idInst, hConv, "Get");
                 DDERequest(idInst, hConv, "Value", result, sizeof(result)); 
-				sprintf(command, "caput IN:IMAT:HUMIDITY %s", result);
-				printf("%s\n", command);
+				sprintf(command, "caput -t IN:IMAT:PARS:USER:R0 %s", result);
+				if (getenv("VERBOSE") != NULL)
+				{
+				    printf("%s\n", command);
+				}
 				system(command);
 			}
 			else
