@@ -31,13 +31,12 @@ static void DDEExecute(DWORD idInst, HCONV hConv, const char* szCommand)
 {
     HDDEDATA hData = DdeCreateDataHandle(idInst, (LPBYTE)szCommand,
                                lstrlen(szCommand)+1, 0, NULL, CF_TEXT, 0);
-	DWORD result;
     if (hData==NULL)   {
         printf("Command failed: %s error %u\n", szCommand, DdeGetLastError(idInst));
     }
     else    {
         HDDEDATA res = DdeClientTransaction((LPBYTE)hData, 0xFFFFFFFF, hConv, 0L, 0,
-                             XTYP_EXECUTE, timeout_ms/*TIMEOUT_ASYNC*/, &result);
+                             XTYP_EXECUTE, timeout_ms/*TIMEOUT_ASYNC*/, NULL);
 		if (res == NULL)
 		{
             printf("Command failed: %s error %u\n", szCommand, DdeGetLastError(idInst));
@@ -105,7 +104,8 @@ int main(int argc, char* argv[])
         return 0;
     }
 
-    DDEExecute(idInst, hConv, "Source:Instruments.Count");
+//    DDEExecute(idInst, hConv, "Source:Instruments.Count");
+    DDEExecute(idInst, hConv, "Source:Instruments(\"Humidity Controller\").Devices(\"Humidity Programmer\").Object.Temperature");
 		
 	char result[256], command[256];
 
@@ -128,7 +128,7 @@ int main(int argc, char* argv[])
                 DDEExecute(idInst, hConv, "Get");
                 DDERequest(idInst, hConv, "Value", result, sizeof(result)); 
 				sprintf(command, "caput IN:IMAT:HUMIDITY %s", result);
-				printf("%s", command);
+				printf("%s\n", command);
 				system(command);
 			}
 			else
