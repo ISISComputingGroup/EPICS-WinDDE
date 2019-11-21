@@ -43,4 +43,6 @@ process variable *$(P)$(R)DOUBLETEST:SP* defined in *WinDDETest.db*. The "IOC" i
 You need to load  *dde.llb*  from the  *vi.lib/Platform*  folder in the LabVIEW distribution
 Setting a value from here was reflected in the *$(P)$(R)DOUBLETEST* PV as well as in Excel
 
+There is an example *ddetest.vi* file in this repository
+
 Any comments/problems, contact: freddie.akeroyd@stfc.ac.uk
