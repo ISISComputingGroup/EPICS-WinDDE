@@ -45,4 +45,11 @@ Setting a value from here was reflected in the *$(P)$(R)DOUBLETEST* PV as well a
 
 There is an example *ddetest.vi* file in this repository
 
+### Debugging
+
+Additional information will be printed to the IOC console if the following is types at the IOC   epics>   prompt
+```
+var debugDDE 1
+```
+
 Any comments/problems, contact: freddie.akeroyd@stfc.ac.uk
