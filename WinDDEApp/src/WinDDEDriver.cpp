@@ -39,6 +39,9 @@
 #include "WinDDEDriver.h"
 #include "WinDDEMsg.h"
 
+/// to anable debug output from EPICS
+static int debugDDE = 0;
+
 /// private windows message for notifying DDE of epics value change
 #define WM_EPICSDDE WM_USER
 
@@ -126,7 +129,10 @@ HDDEDATA CALLBACK WinDDEDriver::DdeCallback(
 		{
 			std::string itemName = getString(m_idInst, hsz2);
 			std::string itemValue;
-			//			  printf("sys request: %s\n", itemName.c_str());
+			if (debugDDE)
+			{
+			    std::cout << "DDE REQUEST(sysTopic): " << itemName << std::endl;
+			}
 			if (hsz2 == topicFormats)
 			{
 				itemValue = "TEXT";
@@ -157,7 +163,10 @@ HDDEDATA CALLBACK WinDDEDriver::DdeCallback(
 		{
 			std::string itemName = getString(m_idInst, hsz2);
 			std::string itemValue;
-			//			  printf("request: %s\n", itemName.c_str());
+			if (debugDDE)
+			{
+			    std::cout << "DDE REQUEST(getPVTopic): " << itemName << std::endl;
+			}
 			if (hsz2 == topicItemList)
 			{
 				itemValue = SZDDE_ITEM_ITEMLIST "\t" SZDDESYS_ITEM_FORMATS ; 
@@ -182,7 +191,7 @@ HDDEDATA CALLBACK WinDDEDriver::DdeCallback(
 		}
 		else
 		{
-			printf("unknown request callback %d\n", uType);
+			std::cout << "DDE ERROR: unknown request callback type " << uType << " or format " << uFmt << std::endl;
 		}
 		return (HDDEDATA)NULL;
 		break;
@@ -202,27 +211,36 @@ HDDEDATA CALLBACK WinDDEDriver::DdeCallback(
 			memcpy(buffer, lpData, cbDataLen);
 			buffer[cbDataLen] = '\0';
 			DdeUnaccessData(hdata);
-			//			  printf("poke: %s=%s\n", itemName.c_str(), buffer);
+			if (debugDDE)
+			{
+			    std::cout << "DDE POKE: " << itemName << " = \"" << buffer << "\"" << std::endl;
+			}
 			m_driver->setParamValueAsString(itemName, buffer);
 			delete[] buffer;
 			return (HDDEDATA)DDE_FACK;
 		}
-		//	      printf("unknown poke callback %d\n", uType);
+		else
+		{
+			std::cout << "DDE ERROR: unknown poke callback type " << uType << " or format " << uFmt << std::endl;
+		}
 		return (HDDEDATA)DDE_FNOTPROCESSED;
 		break;
 
 	case XTYP_ADVSTART:
 		if (hsz1 == m_pvTopic && uFmt == CF_TEXT)
 		{
-			//		      std::string itemName = getString(m_idInst, hsz2);
-			//		      printf("advice loop: %s\n", itemName.c_str());
+			if (debugDDE)
+			{
+			    std::string itemName = getString(m_idInst, hsz2);
+				std::cout << "DDE: advice loop: " << itemName << std::endl;
+			}
 			return (HDDEDATA)TRUE; // we allow advice loops on all items
 		}
 		else
 		{
-			//		      std::string topicName = getString(m_idInst, hsz1);
-			//		      std::string itemName = getString(m_idInst, hsz2);
-			//	          printf("advstart callback %s %s %d\n", topicName.c_str(), itemName.c_str(), uFmt);
+			std::string topicName = getString(m_idInst, hsz1);
+			std::string itemName = getString(m_idInst, hsz2);
+			std::cout << "DDE ERROR: unknown advstart: topic: " << topicName << " format: " << uFmt << " item: " << itemName << std::endl;
 			return (HDDEDATA)FALSE;
 		}
 		break;
@@ -232,7 +250,7 @@ HDDEDATA CALLBACK WinDDEDriver::DdeCallback(
 		break;
 
 	default:
-		printf("unknown callback %d\n", uType);
+		printf("DDE ERROR: unknown callback %d\n", uType);
 		return (HDDEDATA)NULL;
 		break;
 	}
@@ -244,9 +262,12 @@ void WinDDEDriver::setParamValueAsString(const std::string& itemName, const char
 	int index = -1;
 	asynParamType paramType;
 	lock();
-	if (findParam(itemName.c_str(), &index) == asynSuccess)
+	if (findParam(itemName.c_str(), &index) == asynSuccess && getParamType(index, &paramType) == asynSuccess)
 	{
-		getParamType(index, &paramType);
+		if (debugDDE)
+		{
+			std::cout << "DDE ERROR: setParamValueAsString: " << itemName << " type: " << paramType << " value: " << itemValue << std::endl;
+		}
 		switch (paramType)
 		{
 		case asynParamInt32:
@@ -263,6 +284,7 @@ void WinDDEDriver::setParamValueAsString(const std::string& itemName, const char
 
 		default:
 			printf("invalid parameter type\n");
+			index = -1;
 			break;
 		}
 	}
@@ -271,7 +293,10 @@ void WinDDEDriver::setParamValueAsString(const std::string& itemName, const char
 		printf("unknown item %s\n", itemName.c_str());
 		index = -1;
 	}
-	callParamCallbacks();
+	if (index >= 0)
+	{
+	    callParamCallbacks(paramType);
+	}
 	unlock();
 	// post an update so all DDE clients see change
 	if (index >= 0)
@@ -528,6 +553,7 @@ extern "C" {
 	}
 
 	epicsExportRegistrar(WinDDERegister);
+	epicsExportAddress(int, debugDDE);
 
 }
 
