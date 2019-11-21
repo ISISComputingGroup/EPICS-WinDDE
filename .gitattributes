@@ -27,3 +27,4 @@
 *.lvproj binary
 *.lvlps binary
 *.lvlib binary
+*.xslx binary
