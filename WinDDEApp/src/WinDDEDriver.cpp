@@ -240,7 +240,8 @@ HDDEDATA CALLBACK WinDDEDriver::DdeCallback(
 		{
 			std::string topicName = getString(m_idInst, hsz1);
 			std::string itemName = getString(m_idInst, hsz2);
-			std::cout << "DDE ERROR: unknown advstart: topic: " << topicName << " format: " << uFmt << " item: " << itemName << std::endl;
+// we seem to get these from excel anyway
+//			std::cout << "DDE ERROR: unknown advstart: topic: " << topicName << " format: " << uFmt << " item: " << itemName << std::endl;
 			return (HDDEDATA)FALSE;
 		}
 		break;
@@ -266,20 +267,23 @@ void WinDDEDriver::setParamValueAsString(const std::string& itemName, const char
 	{
 		if (debugDDE)
 		{
-			std::cout << "DDE ERROR: setParamValueAsString: " << itemName << " type: " << paramType << " value: " << itemValue << std::endl;
+			std::cout << "DDE: setParamValueAsString: " << itemName << " type: " << paramType << " value: " << itemValue << std::endl;
 		}
 		switch (paramType)
 		{
 		case asynParamInt32:
 			setIntegerParam(DDEIntType, index, atoi(itemValue));
+			callParamCallbacks(DDEIntType);
 			break;
 
 		case asynParamFloat64:
 			setDoubleParam(DDEDoubleType, index, atof(itemValue));
+			callParamCallbacks(DDEDoubleType);
 			break;
 
 		case asynParamOctet:
 			setStringParam(DDEStringType, index, itemValue);
+			callParamCallbacks(DDEStringType);
 			break;
 
 		default:
@@ -292,10 +296,6 @@ void WinDDEDriver::setParamValueAsString(const std::string& itemName, const char
 	{
 		printf("unknown item %s\n", itemName.c_str());
 		index = -1;
-	}
-	if (index >= 0)
-	{
-	    callParamCallbacks(paramType);
 	}
 	unlock();
 	// post an update so all DDE clients see change
