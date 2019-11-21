@@ -163,10 +163,6 @@ HDDEDATA CALLBACK WinDDEDriver::DdeCallback(
 		{
 			std::string itemName = getString(m_idInst, hsz2);
 			std::string itemValue;
-			if (debugDDE)
-			{
-			    std::cout << "DDE REQUEST(getPVTopic): " << itemName << std::endl;
-			}
 			if (hsz2 == topicItemList)
 			{
 				itemValue = SZDDE_ITEM_ITEMLIST "\t" SZDDESYS_ITEM_FORMATS ; 
@@ -179,6 +175,10 @@ HDDEDATA CALLBACK WinDDEDriver::DdeCallback(
 			else
 			{
 				m_driver->getParamValueAsString(itemName, itemValue);
+			}
+			if (debugDDE)
+			{
+				std::cout << "DDE REQUEST(getPVTopic): " << itemName << " = \"" << itemValue << "\"" << std::endl;
 			}
 			return DdeCreateDataHandle(
 				m_idInst,
@@ -311,9 +311,8 @@ void WinDDEDriver::getParamValueAsString(const std::string& itemName, std::strin
 	asynParamType paramType;
 	char buffer[32];
 	lock();
-	if (findParam(itemName.c_str(), &index) == asynSuccess)
+	if (findParam(itemName.c_str(), &index) == asynSuccess && getParamType(index, &paramType) == asynSuccess)
 	{
-		getParamType(index, &paramType);
 		switch (paramType)
 		{
 		case asynParamInt32:
