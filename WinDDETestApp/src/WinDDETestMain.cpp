@@ -16,6 +16,7 @@
 #include <epicsExit.h>
 #include <epicsThread.h>
 #include <iocsh.h>
+#include <shareLib.h>
 
 // include definition of WinDDEIOCMain() 
 #include "WinDDEMsg.h"
