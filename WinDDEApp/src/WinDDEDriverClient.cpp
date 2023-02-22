@@ -2,6 +2,8 @@
 #include <ddeml.h>
 #include <stdio.h>
 #include <process.h>
+#include <atomic>
+#include <iostream>
 
 static const char szApp[] = "Laboratory";
 static char szTopic[] = "DDEGet";
@@ -13,6 +15,9 @@ static DWORD ddeThreadId;
 
 DWORD idInst=0;
 HSZ hszApp, hszTopic;
+
+static std::atomic<unsigned long> total_error_counter = 0;
+#define MAX_ERRORS 20
 
 static HDDEDATA CALLBACK DdeCallback(
     UINT uType,     // Transaction type.
@@ -33,6 +38,7 @@ static void DDEExecute(DWORD idInst, HCONV hConv, const char* szCommand)
                                lstrlen(szCommand)+1, 0, NULL, CF_TEXT, 0);
     if (hData==NULL)   {
         printf("Command failed: %s error %u\n", szCommand, DdeGetLastError(idInst));
+        ++total_error_counter;
     }
     else    {
         HDDEDATA res = DdeClientTransaction((LPBYTE)hData, 0xFFFFFFFF, hConv, 0L, 0,
@@ -40,7 +46,12 @@ static void DDEExecute(DWORD idInst, HCONV hConv, const char* szCommand)
 		if (res == NULL)
 		{
             printf("Command failed: %s error %u\n", szCommand, DdeGetLastError(idInst));
+            ++total_error_counter;
 		}
+        else
+        {
+            total_error_counter = 0;
+        }
     }
 //	DdeFreeDataHandle(hData); // not needed as becomed invaliad afet  DdeClientTransaction call
 }
@@ -54,6 +65,7 @@ static void DDERequest(DWORD idInst, HCONV hConv, const char* szItem, char* resu
     {
         printf("Request failed: %s error %u\n", szItem, DdeGetLastError(idInst));
 		result[0] = '\0';
+        ++total_error_counter;
     }
     else
     {
@@ -61,6 +73,7 @@ static void DDERequest(DWORD idInst, HCONV hConv, const char* szItem, char* resu
 		result[len] = '\0';
 		result[len_result-1] = '\0';
 	    DdeFreeDataHandle(hData);
+        total_error_counter = 0;
     }
 }
 
@@ -72,6 +85,7 @@ static void dataPoller(void* arg)
 	    if (PostThreadMessage(ddeThreadId, WM_EPICSDDE, (WPARAM)0, 0) == 0)
 	    {
 		    printf("dataPoller error\n");
+            ++total_error_counter;
 	    }
 	}
 }
@@ -127,6 +141,7 @@ int main(int argc, char* argv[])
 		{
 			// handle the error and possibly exit
 			printf("win message error\n");
+            ++total_error_counter;
 		}
 		else
 		{
@@ -146,6 +161,11 @@ int main(int argc, char* argv[])
 				TranslateMessage(&msg);
 				DispatchMessage(&msg);
 			}
+            if (total_error_counter > MAX_ERRORS)
+            {
+                std::cerr << "Terminating as error count = " << total_error_counter << std::endl;
+                return 1;
+            }
 		}
 	}
     //DDE Disconnect and Uninitialize.
@@ -155,7 +175,3 @@ int main(int argc, char* argv[])
     Sleep(3000);
     return 1;
 }
-
-
-
-

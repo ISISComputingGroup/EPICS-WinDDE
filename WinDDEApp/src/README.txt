@@ -1,0 +1,1 @@
+double click on  run_windde.bat  to start if not running
